@@ -4,13 +4,21 @@ mod utils;
 
 use std::{
   cmp,
-  sync::mpsc::{channel, Receiver, Sender},
+  sync::{
+    atomic::AtomicU32,
+    mpsc::{channel, Receiver, Sender},
+    Arc, Mutex,
+  },
+  thread,
+  time::Duration,
 };
 
 use napi_derive::napi;
 use option::{Options, Spinner};
 use strip_ansi_escapes::strip_str;
 use termion::terminal_size;
+
+type ChannelData = (Option<i32>, Option<Vec<&'static str>>);
 
 #[napi(js_name = "Ora")]
 pub struct Ora {
@@ -22,9 +30,7 @@ pub struct Ora {
   pub is_enable: bool,
   pub is_spinning: bool,
   pub is_tty: bool,
-  pub spinner: option::Spinner,
-  sender: Sender<(Option<i32>, Option<Vec<String>>)>,
-  recv: Receiver<(Option<i32>, Option<Vec<String>>)>,
+  spinner: Arc<Mutex<option::Spinner>>,
 }
 
 #[napi]
@@ -36,7 +42,7 @@ impl Ora {
       hide_cursour: Some(true),
       ..options.clone()
     };
-    let (sender, recv) = channel::<(Option<i32>, Option<Vec<String>>)>();
+
     let mut ora = Self {
       options: inner_options.clone(),
       line_count: 0,
@@ -46,12 +52,10 @@ impl Ora {
       is_enable: inner_options.is_enable.unwrap_or(true),
       is_spinning: false,
       is_tty: atty::is(atty::Stream::Stdout),
-      sender,
-      recv,
-      spinner: inner_options.spinner.unwrap_or(Spinner {
+      spinner: Arc::new(Mutex::new(inner_options.spinner.unwrap_or(Spinner {
         interval: 80,
         frames: vec!["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"],
-      }),
+      }))),
     };
     ora.update_line_count();
 
@@ -107,8 +111,13 @@ impl Ora {
   #[napi]
   pub fn start(&mut self, text: Option<&str>) -> &mut Ora {
     self.text = text.unwrap_or(&self.text).to_string();
-
     self.is_spinning = true;
+
+    let spinner = Arc::clone(&self.spinner);
+    thread::spawn(move || loop {
+      let mut spinner = spinner.lock().unwrap();
+      thread::sleep(Duration::from_millis(spinner.interval as u64));
+    });
 
     self
   }
