@@ -1,0 +1,15 @@
+{
+  "name": "rs-ora-darwin-universal",
+  "version": "0.0.0",
+  "os": [
+    "darwin"
+  ],
+  "main": "rs-ora.darwin-universal.node",
+  "files": [
+    "rs-ora.darwin-universal.node"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">= 10"
+  }
+}
