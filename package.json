@@ -25,7 +25,11 @@
   "license": "MIT",
   "devDependencies": {
     "@napi-rs/cli": "^2.17.0",
-    "ava": "^5.1.1"
+    "@rspack/cli": "^0.5.3",
+    "@rspack/core": "^0.5.3",
+    "@types/node": "^20.11.6",
+    "ava": "^5.1.1",
+    "typescript": "^5.3.3"
   },
   "ava": {
     "timeout": "3m"
@@ -34,16 +38,20 @@
     "node": ">= 10"
   },
   "scripts": {
+    "dev": "rspack build -w",
     "artifacts": "napi artifacts",
-    "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
+    "build": "napi build --platform --release --js binding.js --dts binding.d.ts",
+    "build:debug": "napi build --platform  --js binding.js --dts binding.d.ts",
     "prepublishOnly": "napi prepublish -t npm",
     "test": "ava",
     "universal": "napi universal",
     "version": "napi version"
   },
   "dependencies": {
-    "electron": "^28.1.1",
-    "ora": "5"
+    "chalk": "^5.3.0",
+    "cli-spinners": "^2.9.2",
+    "is-unicode-supported": "^2.0.0",
+    "log-symbols": "^6.0.0",
+    "stdin-discarder": "^0.2.2"
   }
 }

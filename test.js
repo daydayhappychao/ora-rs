@@ -1,22 +1,19 @@
-const ora = require("ora");
-const myOra = require("./index");
+const myOra = require("./bundle");
 
 // const spinner = ora("Loading unicorns").start();
 // spinner.text = "loading";
+// console.log(myOra);
+const o = myOra.default("很高兴遇见你");
+o.start();
+let startDate = Date.now();
+// console.log(Date.now())
+while (true) {
+  if(Date.now() - startDate > 3 * 1000) {
+    break;
+  }
+}
+// console.log(Date.now())
 
-const o = new myOra.Ora({
-  text: "s",
-  prefixText: "你",
-  prefixTextFn: "",
-  suffixText: "我",
-  color: "cyan",
-  hideCursour: false,
-  indent: 0,
-  interval: 100,
-  isEnable: true,
-  isSilent: false,
-  discardStdin: false,
-});
-o.start("haluomotuo");
-while (true) {}
+o.stop()
+while(true){}
 // console.log(124);

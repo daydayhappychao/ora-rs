@@ -8,6 +8,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 atty = "0.2.14"
+console = "0.15.8"
 lazy_static = "1.4.0"
 maplit = "1.0.2"
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix

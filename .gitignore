@@ -195,3 +195,13 @@ Cargo.lock
 !.yarn/versions
 
 *.node
+
+
+index.js
+index.d.ts
+type.js
+type.d.ts
+
+bundle.js
+bundle.js.map
+types/
