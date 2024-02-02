@@ -10,12 +10,9 @@ crate-type = ["cdylib"]
 atty = "0.2.14"
 console = "0.15.8"
 lazy_static = "1.4.0"
-maplit = "1.0.2"
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
 napi = { version = "2.14.2", features = ["napi4", "tokio_rt"] }
 napi-derive = "2.14.6"
-strip-ansi-escapes = "0.2.0"
-strum = { version = "0.25.0", features = ["derive"] }
 termion = "3.0.0"
 unicode-width = "0.1.11"
 

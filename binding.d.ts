@@ -13,6 +13,9 @@ export interface Options {
   frames: string[]
   logWithoutTty: boolean
   enable: boolean
+  hideCursor: boolean
+  prefixText?: string
+  suffixText?: string
 }
 export type Ora = OraBinding
 export class OraBinding {
@@ -22,8 +25,8 @@ export class OraBinding {
   run(): void
   stop(): void
   pureWrite(text: string): void
+  clear(): void
   updateText(text: string): void
   updateInterval(interval: number): void
   updateFrames(frames: Array<string>): void
-  clear(): void
 }

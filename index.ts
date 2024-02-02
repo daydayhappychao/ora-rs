@@ -53,12 +53,16 @@ class Ora {
         this.suffixText = this.#options.suffixText;
         this.indent = this.#options.indent;
 
+        const { hideCursor = true } = this.#options;
         this.binding = new OraBinding({
             text: this.text,
             interval: this.interval,
             frames: this.spinner.frames,
             logWithoutTty: this.isEnabled,
-            enable: this.isSilent
+            enable: this.isSilent,
+            hideCursor: hideCursor,
+            prefixText: this.prefixText,
+
         });
     }
 
@@ -73,7 +77,6 @@ class Ora {
         }
 
         this.#indent = indent;
-        // this.#updateLineCount();
     }
 
     get interval() {
@@ -145,42 +148,6 @@ class Ora {
         return this.binding.isSpinning;
     }
 
-    #getFullPrefixText(prefixText = this.#prefixText, postfix = ' ') {
-        if (typeof prefixText === 'string' && prefixText !== '') {
-            return prefixText + postfix;
-        }
-
-        if (typeof prefixText === 'function') {
-            return prefixText() + postfix;
-        }
-
-        return '';
-    }
-
-    #getFullSuffixText(suffixText = this.#suffixText, prefix = ' ') {
-        if (typeof suffixText === 'string' && suffixText !== '') {
-            return prefix + suffixText;
-        }
-
-        if (typeof suffixText === 'function') {
-            return prefix + suffixText();
-        }
-
-        return '';
-    }
-
-    // #updateLineCount() {
-    //     const columns = this.#stream.columns ?? 80;
-    //     const fullPrefixText = this.#getFullPrefixText(this.#prefixText, '-');
-    //     const fullSuffixText = this.#getFullSuffixText(this.#suffixText, '-');
-    //     const fullText = ' '.repeat(this.#indent) + fullPrefixText + '--' + this.#text + '--' + fullSuffixText;
-
-    //     this.#lineCount = 0;
-    //     for (const line of stripAnsi(fullText).split('\n')) {
-    //         this.#lineCount += Math.max(1, Math.ceil(stringWidth(line, { countAnsiEscapeCodes: true }) / columns));
-    //     }
-    // }
-
     get isEnabled() {
         return this.#isEnabled && !this.#isSilent;
     }
@@ -205,21 +172,6 @@ class Ora {
         this.#isSilent = value;
     }
 
-    // frame() {
-    //     const { frames } = this.#spinner;
-    //     let frame = frames[this.#frameIndex];
-
-    //     if (this.color) {
-    //         frame = chalk[this.color](frame);
-    //     }
-
-    //     this.#frameIndex = ++this.#frameIndex % frames.length;
-    //     const fullPrefixText = (typeof this.#prefixText === 'string' && this.#prefixText !== '') ? this.#prefixText + ' ' : '';
-    //     const fullText = typeof this.text === 'string' ? ' ' + this.text : '';
-    //     const fullSuffixText = (typeof this.#suffixText === 'string' && this.#suffixText !== '') ? ' ' + this.#suffixText : '';
-
-    //     return fullPrefixText + frame + fullText + fullSuffixText;
-    // }
 
     clear() {
         if (!this.#isEnabled || !this.binding.isTty) {
@@ -230,18 +182,6 @@ class Ora {
         return this;
 
     }
-
-    // render() {
-    //     if (this.#isSilent) {
-    //         return this;
-    //     }
-
-    //     this.clear();
-    //     this.binding.pureWrite(this.frame());
-    //     this.#linesToClear = this.#lineCount;
-
-    //     return this;
-    // }
 
     start(text?: string) {
         if (text) {
@@ -282,9 +222,6 @@ class Ora {
         // clearInterval(this.#id);
         this.binding.stop();
         this.clear();
-        // if (this.#options.hideCursor) {
-        //     cliCursor.show(this.#stream);
-        // }
 
         if (this.#options.discardStdin && process.stdin.isTTY && this.#isDiscardingStdin) {
             // stdinDiscarder.stop();
@@ -315,21 +252,9 @@ class Ora {
             return this;
         }
 
-        const prefixText = options.prefixText ?? this.#prefixText;
-        const fullPrefixText = this.#getFullPrefixText(prefixText, ' ');
-
-        const symbolText = options.symbol ?? ' ';
-
-        const text = options.text ?? this.text;
-        const fullText = (typeof text === 'string') ? ' ' + text : '';
-
-        const suffixText = options.suffixText ?? this.#suffixText;
-        const fullSuffixText = this.#getFullSuffixText(suffixText, ' ');
-
-        const textToWrite = fullPrefixText + symbolText + fullText + fullSuffixText + '\n';
-
+        const text = options.text ?? this.text ?? "";
         this.stop();
-        this.binding.pureWrite(textToWrite);
+        this.binding.pureWrite(text);
 
         return this;
     }

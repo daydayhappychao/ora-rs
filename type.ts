@@ -29,12 +29,12 @@ export type Options = {
     /**
     Text or a function that returns text to display before the spinner. No prefix text will be displayed if set to an empty string.
     */
-    readonly prefixText?: string | PrefixTextGenerator;
+    readonly prefixText?: string;
 
     /**
     Text or a function that returns text to display after the spinner text. No suffix text will be displayed if set to an empty string.
     */
-    readonly suffixText?: string | SuffixTextGenerator;
+    readonly suffixText?: string;
 
     /**
     Name of one of the provided spinners. See [`example.js`](https://github.com/BendingBender/ora/blob/main/example.js) in this repo if you want to test out different spinners. On Windows, it will always use the line spinner as the Windows command-line doesn't have proper Unicode support.
