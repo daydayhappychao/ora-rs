@@ -8,12 +8,18 @@ const config = {
     path: ".",
     filename: "bundle.js",
     libraryTarget: "commonjs",
+    // module: true,
   },
   mode: "development",
   target: "node10",
   devtool: "source-map",
   externals: ["./binding"],
   externalsType: "commonjs",
+  experiments: {
+    rspackFuture: {
+      newTreeshaking: true,
+    },
+  },
   module: {
     rules: [
       {

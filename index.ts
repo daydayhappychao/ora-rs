@@ -206,7 +206,7 @@ class Ora {
 
         if (this.#options.discardStdin && process.stdin.isTTY) {
             this.#isDiscardingStdin = true;
-            // stdinDiscarder.start();
+            stdinDiscarder.start();
         }
 
         this.binding.run();
@@ -224,7 +224,7 @@ class Ora {
         this.clear();
 
         if (this.#options.discardStdin && process.stdin.isTTY && this.#isDiscardingStdin) {
-            // stdinDiscarder.stop();
+            stdinDiscarder.stop();
             this.#isDiscardingStdin = false;
         }
 

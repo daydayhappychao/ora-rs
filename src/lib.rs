@@ -1,4 +1,5 @@
 mod option;
+mod stdin_discarder;
 
 use std::{
   sync::{Arc, Mutex},
@@ -10,7 +11,6 @@ use std::{
 use console::Term;
 use napi_derive::napi;
 use option::Options;
-use termion::terminal_size;
 use unicode_width::UnicodeWidthStr;
 
 type SharedData<T> = Arc<Mutex<T>>;
@@ -19,18 +19,18 @@ type SharedData<T> = Arc<Mutex<T>>;
 pub struct Ora {
   log_without_tty: SharedData<bool>,
   enable: SharedData<bool>,
-  text: Arc<Mutex<String>>,
-  interval: Arc<Mutex<usize>>,
-  frames: Arc<Mutex<Vec<&'static str>>>,
-  frame_index: Arc<Mutex<usize>>,
-  line_count: Arc<Mutex<usize>>,
-  stop_flag: Arc<Mutex<bool>>,
+  text: SharedData<String>,
+  interval: SharedData<usize>,
+  frames: SharedData<Vec<&'static str>>,
+  frame_index: SharedData<usize>,
+  line_count: SharedData<usize>,
+  stop_flag: SharedData<bool>,
   join: Option<JoinHandle<()>>,
-  stream: Arc<Mutex<Term>>,
-  first_render: Arc<Mutex<bool>>,
-  hide_cursor: Arc<Mutex<bool>>,
-  prefix_text: Arc<Mutex<String>>,
-  suffix_text: Arc<Mutex<String>>,
+  stream: SharedData<Term>,
+  first_render: SharedData<bool>,
+  hide_cursor: SharedData<bool>,
+  prefix_text: SharedData<String>,
+  suffix_text: SharedData<String>,
   pub is_spinning: bool,
   pub is_tty: bool,
 }
@@ -61,7 +61,6 @@ impl Ora {
       suffix_text: Arc::new(Mutex::new(options.suffix_text.unwrap_or("".to_string()))),
     };
 
-    ora.sync_line_count();
     ora
   }
 
@@ -100,7 +99,7 @@ impl Ora {
         let inner_text = self_text.lock().unwrap();
         let inner_frames = frames.lock().unwrap();
         let mut inner_first_render = first_render.lock().unwrap();
-        let inner_line_count = line_count.lock().unwrap();
+        let mut inner_line_count = line_count.lock().unwrap();
         let inner_prefix_text = prefix_text.lock().unwrap();
         let inner_suffix_text = suffix_text.lock().unwrap();
 
@@ -138,6 +137,21 @@ impl Ora {
         } else {
           inner_stream.clear_last_lines(*inner_line_count).unwrap();
         }
+        let (columns, rows) = inner_stream.size();
+
+        let next_line_count: usize = text
+          .split("\n")
+          .map(|s| {
+            console::strip_ansi_codes(s)
+              .width()
+              .div_ceil(columns.into())
+          })
+          .sum();
+
+        if next_line_count != *inner_line_count {
+          *inner_line_count = next_line_count;
+        }
+
         inner_stream.write_line(text.as_str()).unwrap();
 
         *inner_frame_index += 1;
@@ -201,25 +215,11 @@ impl Ora {
     *inner_stop_flag = next_stop_flag;
   }
 
-  fn sync_line_count(&self) {
-    let binding_line_count = Arc::clone(&self.line_count).clone();
-    let binding_text = Arc::clone(&self.text).clone();
-    let inner_text = binding_text.lock().unwrap();
-    let mut inner_line_count = binding_line_count.lock().unwrap();
-    let (columns, rows) = terminal_size().unwrap_or((80, 80));
-    let pure_text = console::strip_ansi_codes(inner_text.as_str());
-    // 1 is spinner frame，other 1 is whitespace
-    let pure_text_size = pure_text.width() + 1 + 1;
-    let line_count = pure_text_size.div_ceil(columns.into()) as usize;
-    *inner_line_count = line_count;
-  }
-
   #[napi]
   pub fn update_text(&self, text: String) -> () {
     let binding_text = Arc::clone(&self.text).clone();
     let mut inner_text = binding_text.lock().unwrap();
     *inner_text = text.clone();
-    self.sync_line_count();
   }
 
   #[napi]

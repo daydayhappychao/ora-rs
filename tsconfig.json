@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "commonjs",
+    "emitDeclarationOnly": true,
     "allowJs": false,
     "declaration": true,
     "esModuleInterop": true,

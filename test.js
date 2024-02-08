@@ -14,6 +14,23 @@ while (true) {
 }
 // console.log(Date.now())
 
+o.text = "打个中国结，再系个\n红腰带，天天好运来"
+
+while (true) {
+  if(Date.now() - startDate > 6 * 1000) {
+    break;
+  }
+}
+
+o.spinner = "balloon2";
+
+while (true) {
+  if(Date.now() - startDate > 9 * 1000) {
+    break;
+  }
+}
+
+
 o.stop();
 console.log('真的很高兴，真的')
 while(true){}
